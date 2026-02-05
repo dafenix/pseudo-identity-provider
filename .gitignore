@@ -42,3 +42,9 @@
 # System files
 .DS_Store
 Thumbs.db
+
+# Docker
+.env
+config/config.json
+
+# Note: nginx/ssl/* certificates are intentionally committed (static test certs)
