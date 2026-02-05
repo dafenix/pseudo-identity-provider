@@ -1,0 +1,56 @@
+services:
+  # Standard Pseudo IdP Service
+  pseudo-idp:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: pseudo-idp
+    ports:
+      - "${PSEUDO_IDP_PORT:-8083}:8080"
+    environment:
+      - LOG_USERNAME=${LOG_USERNAME:-admin}
+      # Default password is 'test' - Generate new hash with: cd src/hash && go run hash_salt.go
+      # Note: Use single $ in .env file, double $$ in docker-compose.yml
+      - LOG_PASSWORD=${LOG_PASSWORD:-$2a$10$s/jpYKi4n7NnKbpw/JKIX.GSVVId3lla6FbbnkECAMUnVh1azvnYm}
+      # Uncomment to load configuration from file
+      # - CONFIG_FILE=/app/config/config.json
+    volumes:
+      # Mount local config directory to container
+      # Place your config.json in ./config/ to use it
+      - ./config:/app/config
+    networks:
+      - idp-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/.well-known/openid-configuration"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    labels:
+      - "com.pseudo-idp.description=Pseudo Identity Provider - OAuth2/OIDC Test Server"
+
+  # Nginx Reverse Proxy für HTTPS (optional, aktivieren mit --profile https)
+  nginx:
+    image: nginx:alpine
+    container_name: pseudo-idp-nginx
+    ports:
+      - "${HTTPS_PORT:-9443}:443"
+      - "${HTTP_PORT:-8000}:80"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - pseudo-idp
+    networks:
+      - idp-network
+    restart: unless-stopped
+    profiles:
+      - https
+    labels:
+      - "com.pseudo-idp.description=Nginx Reverse Proxy with HTTPS"
+
+networks:
+  idp-network:
+    driver: bridge
+    name: pseudo-idp-network

@@ -1,0 +1,252 @@
+{
+  "auth_action": {
+    "action_type": "redirect",
+    "redirect": {
+      "redirect_target": {
+        "use_custom_redirect_uri": false,
+        "target": "",
+        "custom_key": ""
+      },
+      "default_parameter_action": "passthrough",
+      "parameters": [
+        {
+          "id": "code",
+          "action": "random",
+          "values": null,
+          "custom_key": "",
+          "json_type": "string"
+        },
+        {
+          "id": "redirect_uri",
+          "action": "omit",
+          "values": null,
+          "custom_key": "",
+          "json_type": "string"
+        }
+      ],
+      "use_hash_fragment": false
+    },
+    "error": {
+      "error_code": 0,
+      "error_content": ""
+    }
+  },
+  "token_action": {
+    "action_type": "respond",
+    "respond": {
+      "parameters": [
+        {
+          "id": "id_token",
+          "action": "custom",
+          "values": null,
+          "custom_key": "signed_token_id",
+          "json_type": "string"
+        },
+        {
+          "id": "access_token",
+          "action": "random",
+          "values": null,
+          "custom_key": "",
+          "json_type": "string"
+        },
+        {
+          "id": "refresh_token",
+          "action": "random",
+          "values": null,
+          "custom_key": "",
+          "json_type": "string"
+        },
+        {
+          "id": "expires_in",
+          "action": "set",
+          "values": [
+            "3600"
+          ],
+          "custom_key": "",
+          "json_type": "number"
+        },
+        {
+          "id": "token_type",
+          "action": "set",
+          "values": [
+            "Bearer"
+          ],
+          "custom_key": "",
+          "json_type": "string"
+        }
+      ]
+    },
+    "error": {
+      "error_code": 0,
+      "error_content": ""
+    }
+  },
+  "userinfo_action": {
+    "action_type": "respond",
+    "respond": {
+      "parameters": [
+        {
+          "id": "sub",
+          "action": "set",
+          "values": [
+            "12345abcde"
+          ],
+          "custom_key": "",
+          "json_type": "string"
+        },
+        {
+          "id": "email",
+          "action": "set",
+          "values": [
+            "testsub@{{.Domain}}"
+          ],
+          "custom_key": "",
+          "json_type": "string"
+        }
+      ]
+    },
+    "error": {
+      "error_code": 0,
+      "error_content": ""
+    }
+  },
+  "discovery_action": {
+    "action_type": "respond",
+    "respond": {
+      "parameters": [
+        {
+          "id": "issuer",
+          "action": "set",
+          "values": [
+            "https://{{.Domain}}"
+          ],
+          "custom_key": "",
+          "json_type": "string"
+        },
+        {
+          "id": "authorization_endpoint",
+          "action": "set",
+          "values": [
+            "https://{{.Domain}}/oauth2/auth"
+          ],
+          "custom_key": "",
+          "json_type": "string"
+        },
+        {
+          "id": "token_endpoint",
+          "action": "set",
+          "values": [
+            "https://{{.Domain}}/oauth2/token"
+          ],
+          "custom_key": "",
+          "json_type": "string"
+        },
+        {
+          "id": "userinfo_endpoint",
+          "action": "set",
+          "values": [
+            "https://{{.Domain}}/oauth2/userinfo"
+          ],
+          "custom_key": "",
+          "json_type": "string"
+        },
+        {
+          "id": "jwks_uri",
+          "action": "set",
+          "values": [
+            "https://{{.Domain}}/.well-known/jwks.json"
+          ],
+          "custom_key": "",
+          "json_type": "string"
+        },
+        {
+          "id": "subject_types_supported",
+          "action": "set",
+          "values": [
+            "public"
+          ],
+          "custom_key": "",
+          "json_type": "array"
+        },
+        {
+          "id": "id_token_signing_alg_values_supported",
+          "action": "set",
+          "values": [
+            "RS256",
+            "RS512",
+            "ES256"
+          ],
+          "custom_key": "",
+          "json_type": "array"
+        },
+        {
+          "id": "response_types_supported",
+          "action": "set",
+          "values": [
+            "code",
+            "code id_token",
+            "id_token",
+            "token id_token",
+            "token",
+            "token id_token code"
+          ],
+          "custom_key": "",
+          "json_type": "array"
+        }
+      ]
+    },
+    "error": {
+      "error_code": 0,
+      "error_content": ""
+    }
+  },
+  "id_token_config": {
+    "alg": "RS256",
+    "remove_signature": false,
+    "use_wrong_key": false,
+    "claims": [
+      {
+        "id": "iss",
+        "values": [
+          "https://{{.Domain}}"
+        ],
+        "json_type": "string"
+      },
+      {
+        "id": "aud",
+        "values": [
+          "{{if .Session}}{{.Session.ClientID}}{{end}}"
+        ],
+        "json_type": "string"
+      },
+      {
+        "id": "nonce",
+        "values": [
+          "{{if .Session}}{{.Session.Nonce}}{{end}}"
+        ],
+        "json_type": "string"
+      },
+      {
+        "id": "iat",
+        "values": [
+          "{{.Time.Unix}}"
+        ],
+        "json_type": "number"
+      },
+      {
+        "id": "exp",
+        "values": [
+          "{{with $tomorrow := .Time.AddDate 0 0 1}}{{$tomorrow.Unix}}{{end}}"
+        ],
+        "json_type": "number"
+      },
+      {
+        "id": "sub",
+        "values": [
+          "creepy"
+        ],
+        "json_type": "string"
+      }
+    ]
+  }
+}
