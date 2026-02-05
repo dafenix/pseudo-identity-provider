@@ -64,6 +64,11 @@ func jsonResponse(w http.ResponseWriter, input *sessionmgmt.RequestInput, parame
 func getDomain(r *http.Request) string {
 	ctx := appengine.NewContext(r)
 	if !appengine.IsAppEngine() {
+		// Check if we're behind a reverse proxy (e.g., Nginx)
+		// Prefer X-Forwarded-Host header which includes port
+		if forwardedHost := r.Header.Get("X-Forwarded-Host"); forwardedHost != "" {
+			return forwardedHost
+		}
 		return r.Host
 	}
 
