@@ -54,6 +54,39 @@ Stop the service:
 docker compose down
 ```
 
+#### HTTPS with Docker
+
+For HTTPS support, use the nginx reverse proxy with the `https` profile. Before starting, you need to generate SSL certificates.
+
+##### Generate Self-Signed Certificates for localhost
+
+Navigate to the nginx ssl directory and generate certificates:
+
+```bash
+cd docker/nginx/ssl
+```
+
+**Option 1: OpenSSL (Self-signed certificate)**
+
+```bash
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout key.pem -out cert.pem \
+  -subj '/CN=localhost' \
+  -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1'
+```
+
+##### Start with HTTPS
+
+```bash
+cd ../../..  # Return to project root
+docker compose --profile https up -d
+```
+
+The service will be available at:
+- HTTPS: `https://localhost:9443` (default)
+- HTTP: `http://localhost:8000` (redirects to HTTPS)
+
+
 #### Running as a Standalone Server
 
 To start the standalone server, navigate to the src directory and run the standalone go

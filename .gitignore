@@ -46,5 +46,4 @@ Thumbs.db
 # Docker
 .env
 config/config.json
-
-# Note: nginx/ssl/* certificates are intentionally committed (static test certs)
+docker/nginx/ssl/*.pem
