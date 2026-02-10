@@ -1,0 +1,35 @@
+# Git
+.git
+.gitignore
+
+# Node modules (will be installed during build)
+frontend/node_modules
+
+# Angular cache and build artifacts
+frontend/.angular
+frontend/dist
+
+# Go build artifacts
+src/customidp
+
+# Documentation
+docs
+*.md
+README.md
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test files
+frontend/src/**/*.spec.ts
+frontend/karma.conf.js
+
+# CI/CD
+.github

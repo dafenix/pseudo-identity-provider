@@ -42,3 +42,8 @@
 # System files
 .DS_Store
 Thumbs.db
+
+# Docker
+.env
+config/config.json
+docker/nginx/ssl/*.pem

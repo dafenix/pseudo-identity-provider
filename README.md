@@ -32,12 +32,87 @@ ng build
 
 ### Deploying the service
 
-Psuedo IdP can run either as a Google Cloud
-[App Engine Service](https://cloud.google.com/appengine/docs/standard) or as a
-standalone Go binary. Running on the App Engine Standard platform gives you the
-HTTPS support required by most OAuth clients without any additional setup. If
-you want to host the service via other methods of your choosing you will likely
-have to setup HTTPS endpoints via NGINX or some other means.
+Pseudo IdP can be deployed in several ways:
+- **Docker Compose** (recommended) - Easiest setup with optional HTTPS support
+- **Standalone Go binary** - For local development or custom hosting
+- **Google Cloud App Engine** - Managed platform with built-in HTTPS
+
+For production use with custom hosting, you will need to setup HTTPS endpoints via NGINX or similar reverse proxy.
+
+#### Running with Docker Compose
+
+Start the service with Docker Compose:
+
+```bash
+docker compose up -d
+```
+
+The service will be available at `http://localhost:8083` (default login: `admin` / `test`).
+
+Stop the service:
+```bash
+docker compose down
+```
+
+#### HTTPS with Docker
+
+For HTTPS support, use the nginx reverse proxy with the `https` profile. Before starting, you need to generate SSL certificates.
+
+##### Generate Self-Signed Certificates for localhost
+
+Navigate to the nginx ssl directory and generate certificates:
+
+```bash
+cd docker/nginx/ssl
+```
+
+**Option 1: OpenSSL (Self-signed certificate)**
+
+```bash
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout key.pem -out cert.pem \
+  -subj '/CN=localhost' \
+  -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1'
+```
+
+##### Start with HTTPS
+
+```bash
+cd ../../..  # Return to project root
+docker compose --profile https up -d
+```
+
+The service will be available at:
+- HTTPS: `https://localhost:9443` (default)
+- HTTP: `http://localhost:8000` (redirects to HTTPS)
+
+
+#### Running as a Standalone Server
+
+To start the standalone server, navigate to the src directory and run the standalone go
+program. This is convenient if you would like to test locally or if you would
+like to use your own hosting solution. But first, let's setup a password by
+running
+
+```
+cd ./src/hash
+go run hash_salt.go
+```
+
+Enter a password and then set the resulting hash and a username in your
+environment variables with the hash in single quotes.
+
+```
+export LOG_USERNAME=test
+export LOG_PASSWORD='$2a$10$s/jpYKi4n7NnKbpw/JKIX.GSVVId3lla6FbbnkECAMUnVh1azvnYm'
+```
+
+Then run the standalone module to start the server.
+
+```
+cd ./src
+go run ./standalone/standalone_main.go
+```
 
 #### Deploying to App Engine
 
@@ -79,32 +154,21 @@ running instance
 gcloud app browse -s pseudoidp
 ```
 
-#### Running as a Standalone Server
+### Configuration Hot Reload
 
-To start the standalone server the src directory and running the standalone go
-program. This is convenient if you would like to test locally or if you would
-like to use your own hosting solution. But first, let's setup a password by
-running
+The Pseudo Identity Provider supports **automatic configuration reloading** when the configuration file changes - **no restart required**. This feature is **enabled by default** when running with Docker.
 
-```
-cd ./src/hash
-go run hash_salt.go
+Edit the configuration file:
+```bash
+nano config/config.json
 ```
 
-Enter a password and then set the resulting hash and a username in your
-environment variables with the hash in single quotes.
-
-```
-export LOG_USERNAME=test
-export LOG_PASSWORD='$2a$10$s/jpYKi4n7NnKbpw/JKIX.GSVVId3lla6FbbnkECAMUnVh1azvnYm'
+Changes are detected within 1-2 seconds and automatically applied. Watch the logs to verify:
+```bash
+docker compose logs -f pseudo-idp
 ```
 
-Then run the standalone module to start the server.
-
-```
-cd ./src
-go run ./standalone/standalone_main.go
-```
+**Note:** Changes via the Web UI at `http://localhost:8083/` are immediate but not persistent (lost on restart). File-based changes are persistent.
 
 ## Testing it out
 
